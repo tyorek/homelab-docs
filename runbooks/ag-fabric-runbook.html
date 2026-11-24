@@ -1,0 +1,439 @@
+<title>AG Fabric Runbook</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chivo:wght@600;700;900&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+  :root{
+    --ground:#F4F6F8; --surface:#FFFFFF; --surface-2:#EDF1F4;
+    --ink:#13171C; --muted:#586474; --line:#DDE3EA; --line-strong:#C7D0DA;
+    --mgmt:#0C7A88; --data:#B25C1C; --good:#2C8A57; --bad:#BC4038;
+    --shadow:0 1px 2px rgba(20,30,45,.06),0 8px 24px rgba(20,30,45,.05);
+  }
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){
+      --ground:#0C0F14; --surface:#141922; --surface-2:#1A212B;
+      --ink:#E7ECF2; --muted:#8B96A5; --line:#242D39; --line-strong:#33404F;
+      --mgmt:#37C6D6; --data:#E0904E; --good:#54B681; --bad:#E06A61;
+      --shadow:0 1px 2px rgba(0,0,0,.4),0 12px 30px rgba(0,0,0,.3);
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#0C0F14; --surface:#141922; --surface-2:#1A212B;
+    --ink:#E7ECF2; --muted:#8B96A5; --line:#242D39; --line-strong:#33404F;
+    --mgmt:#37C6D6; --data:#E0904E; --good:#54B681; --bad:#E06A61;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 12px 30px rgba(0,0,0,.3);
+  }
+
+  *{box-sizing:border-box}
+  body{
+    background:var(--ground); color:var(--ink);
+    font-family:"IBM Plex Sans",system-ui,sans-serif;
+    line-height:1.55; margin:0; -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1000px; margin:0 auto; padding:clamp(20px,5vw,64px) clamp(16px,4vw,40px)}
+  .mono{font-family:"IBM Plex Mono",ui-monospace,monospace}
+
+  /* ---- header ---- */
+  header{border-bottom:1px solid var(--line); padding-bottom:34px; margin-bottom:44px}
+  .kicker{
+    font-family:"IBM Plex Mono",monospace; font-size:12px; letter-spacing:.18em;
+    text-transform:uppercase; color:var(--mgmt); margin:0 0 14px; font-weight:500;
+  }
+  h1{
+    font-family:"Chivo",sans-serif; font-weight:900; font-size:clamp(2.3rem,6vw,3.9rem);
+    line-height:.98; letter-spacing:-.02em; margin:0; text-wrap:balance;
+  }
+  h1 .dim{color:var(--muted); font-weight:700}
+  .lede{max-width:64ch; color:var(--muted); font-size:1.05rem; margin:18px 0 0}
+  .facts{
+    display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+    gap:1px; background:var(--line); border:1px solid var(--line);
+    border-radius:12px; overflow:hidden; margin-top:30px;
+  }
+  .fact{background:var(--surface); padding:16px 18px}
+  .fact .k{font-family:"IBM Plex Mono",monospace; font-size:11px; letter-spacing:.08em;
+    text-transform:uppercase; color:var(--muted)}
+  .fact .v{font-family:"Chivo",sans-serif; font-weight:700; font-size:1.5rem; line-height:1.1; margin-top:3px}
+  .fact .v small{font-size:.8rem; color:var(--muted); font-weight:600}
+
+  /* ---- sections ---- */
+  section{margin-top:52px}
+  .sec-head{display:flex; align-items:baseline; gap:14px; margin-bottom:22px}
+  .sec-num{font-family:"IBM Plex Mono",monospace; font-size:12px; color:var(--mgmt); font-weight:600}
+  h2{font-family:"Chivo",sans-serif; font-weight:700; font-size:1.5rem; letter-spacing:-.01em; margin:0}
+  .sec-note{color:var(--muted); font-size:.92rem; margin:0 0 22px; max-width:66ch}
+
+  /* ---- diagram ---- */
+  .diagram{
+    background:var(--surface); border:1px solid var(--line); border-radius:14px;
+    padding:8px; box-shadow:var(--shadow); overflow-x:auto;
+  }
+  .diagram svg{display:block; width:100%; min-width:640px; height:auto}
+  .n-box{fill:var(--surface-2); stroke:var(--line-strong); stroke-width:1.2; rx:9}
+  .n-name{fill:var(--ink); font-family:"IBM Plex Mono",monospace; font-weight:600; font-size:14px}
+  .n-sub{fill:var(--muted); font-family:"IBM Plex Sans",sans-serif; font-size:10.5px}
+  .e-data{stroke:var(--data); stroke-width:2.4; fill:none}
+  .e-mgmt{stroke:var(--mgmt); stroke-width:2.4; fill:none}
+  .e-label{font-family:"IBM Plex Mono",monospace; font-size:10px; fill:var(--muted);
+    paint-order:stroke; stroke:var(--surface); stroke-width:3.2px; stroke-linejoin:round}
+  .legend{display:flex; flex-wrap:wrap; gap:20px; padding:14px 16px 6px; align-items:center}
+  .legend span{display:inline-flex; align-items:center; gap:8px; font-size:.82rem; color:var(--muted)}
+  .swatch{width:22px; height:3px; border-radius:2px; display:inline-block}
+
+  /* ---- vlan chips ---- */
+  .vt{
+    display:inline-block; font-family:"IBM Plex Mono",monospace; font-size:11px;
+    font-weight:500; padding:1px 7px; border-radius:5px; line-height:1.6;
+    white-space:nowrap; --c:var(--muted);
+  }
+  .vt.data{--c:var(--data)} .vt.mgmt{--c:var(--mgmt)}
+  .vt.tag{border:1px solid var(--c); color:var(--c); background:transparent}
+  .vt.untag{border:1px solid transparent; color:var(--c);
+    background:color-mix(in srgb,var(--c) 16%,transparent); font-weight:600}
+  .chips{display:flex; flex-wrap:wrap; gap:5px}
+
+  /* ---- tables ---- */
+  .card{background:var(--surface); border:1px solid var(--line); border-radius:14px;
+    box-shadow:var(--shadow); overflow:hidden; margin-bottom:20px}
+  .card-head{display:flex; flex-wrap:wrap; align-items:baseline; gap:10px 14px;
+    padding:16px 20px; border-bottom:1px solid var(--line); background:var(--surface-2)}
+  .card-head .dev{font-family:"Chivo",sans-serif; font-weight:700; font-size:1.15rem}
+  .card-head .meta{font-family:"IBM Plex Mono",monospace; font-size:12px; color:var(--muted)}
+  .card-head .ip{margin-left:auto; font-family:"IBM Plex Mono",monospace; font-size:12px;
+    color:var(--mgmt); font-weight:500}
+  .tbl-scroll{overflow-x:auto}
+  table{border-collapse:collapse; width:100%; font-size:.9rem; min-width:520px}
+  th,td{text-align:left; padding:11px 20px; border-bottom:1px solid var(--line); vertical-align:top}
+  thead th{font-family:"IBM Plex Mono",monospace; font-size:10.5px; letter-spacing:.07em;
+    text-transform:uppercase; color:var(--muted); font-weight:500; background:transparent}
+  tbody tr:last-child td{border-bottom:none}
+  td.port{font-family:"IBM Plex Mono",monospace; font-weight:500; color:var(--ink); white-space:nowrap}
+  td.peer{color:var(--muted); font-family:"IBM Plex Mono",monospace; font-size:.83rem}
+  .plane-pill{font-family:"IBM Plex Mono",monospace; font-size:10px; font-weight:600;
+    padding:1px 8px; border-radius:20px; text-transform:uppercase; letter-spacing:.05em}
+  .plane-pill.data{color:var(--data); background:color-mix(in srgb,var(--data) 14%,transparent)}
+  .plane-pill.mgmt{color:var(--mgmt); background:color-mix(in srgb,var(--mgmt) 14%,transparent)}
+  .plane-pill.mix{color:var(--ink); background:var(--surface-2); border:1px solid var(--line-strong)}
+  .vlan-tbl td:first-child{width:70px}
+
+  /* ---- incident log ---- */
+  .log{display:grid; gap:14px}
+  .inc{background:var(--surface); border:1px solid var(--line); border-radius:12px;
+    box-shadow:var(--shadow); display:grid; grid-template-columns:auto 1fr; gap:0}
+  .inc-n{font-family:"Chivo",sans-serif; font-weight:900; font-size:1.5rem; color:var(--data);
+    padding:18px 4px 0 22px; line-height:1; font-variant-numeric:tabular-nums}
+  .inc-body{padding:16px 22px 18px}
+  .inc h3{font-family:"IBM Plex Sans",sans-serif; font-weight:600; font-size:1.02rem; margin:0 0 5px}
+  .inc p{margin:0; color:var(--muted); font-size:.92rem}
+  .inc .fix{margin-top:10px; padding-top:10px; border-top:1px dashed var(--line);
+    display:flex; gap:9px; align-items:baseline; font-size:.9rem}
+  .inc .fix b{color:var(--good); font-family:"IBM Plex Mono",monospace; font-size:11px;
+    letter-spacing:.06em; text-transform:uppercase; white-space:nowrap}
+  .inc .fix span{color:var(--ink)}
+  code{font-family:"IBM Plex Mono",monospace; font-size:.86em; background:var(--surface-2);
+    padding:1px 5px; border-radius:4px; color:var(--ink)}
+
+  /* ---- housekeeping ---- */
+  .todo{display:grid; gap:12px}
+  .todo li{list-style:none; display:flex; gap:12px; align-items:flex-start;
+    background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:13px 16px}
+  .todo ul{margin:0; padding:0}
+  .box{width:16px; height:16px; border:1.5px solid var(--line-strong); border-radius:4px;
+    margin-top:3px; flex:none}
+  .todo .t{font-weight:600; font-size:.94rem}
+  .todo .d{color:var(--muted); font-size:.88rem}
+
+  footer{margin-top:56px; padding-top:24px; border-top:1px solid var(--line);
+    color:var(--muted); font-size:.85rem; display:flex; flex-wrap:wrap; gap:6px 18px; justify-content:space-between}
+  footer .mono{font-size:.8rem}
+
+  a{color:var(--mgmt)}
+  @media (max-width:560px){
+    .inc{grid-template-columns:1fr} .inc-n{padding:16px 22px 0}
+    th,td{padding:10px 14px}
+  }
+</style>
+
+<div class="wrap">
+
+  <header>
+    <p class="kicker">Homelab · RouterOS 7 · Runbook</p>
+    <h1>AG Fabric <span class="dim">Runbook</span></h1>
+    <p class="lede">The working layout of a MikroTik RB5009 router feeding two CRS305 switches and a Proxmox host — every port, the VLAN plan, and the eight problems that had to be untangled to get a desktop on VLAN&nbsp;5 talking to a VM on VLAN&nbsp;10.</p>
+    <div class="facts">
+      <div class="fact"><div class="k">Router</div><div class="v">map <small>RB5009</small></div></div>
+      <div class="fact"><div class="k">Switches</div><div class="v">AG01 · AG02 <small>CRS305</small></div></div>
+      <div class="fact"><div class="k">VLANs</div><div class="v">6 <small>+ mgmt</small></div></div>
+      <div class="fact"><div class="k">Planes</div><div class="v">2 <small>data / mgmt</small></div></div>
+    </div>
+  </header>
+
+  <!-- TOPOLOGY -->
+  <section>
+    <div class="sec-head"><span class="sec-num">01</span><h2>Topology</h2></div>
+    <p class="sec-note">Two physically separate planes. The <b style="color:var(--data)">data</b> trunk (VLANs 5/10/15/20/30) and the <b style="color:var(--mgmt)">management</b> VLAN (99) ride different cables between the router and AG01; the AG01→AG02 link is the one place they intentionally share glass.</p>
+    <div class="diagram">
+      <svg viewBox="0 0 920 604" role="img" aria-label="Network topology diagram">
+        <!-- map <-> AG01 : data + mgmt (two cables) -->
+        <path class="e-data" d="M446,80 L446,190"/>
+        <path class="e-mgmt" d="M474,80 L474,190"/>
+        <text class="e-label" x="430" y="140" text-anchor="end">5·10·15·20·30</text>
+        <text class="e-label" x="490" y="140">99</text>
+        <!-- map <-> Proxmox mgmt -->
+        <path class="e-mgmt" d="M410,74 C300,150 210,240 175,300"/>
+        <text class="e-label" x="248" y="200">99 · ether6</text>
+        <!-- AG01 <-> Proxmox data -->
+        <path class="e-data" d="M386,232 C320,272 266,296 240,315"/>
+        <text class="e-label" x="300" y="300">10u·5·15·20</text>
+        <!-- AG01 <-> AG02 : mixed -->
+        <path class="e-data" d="M536,222 C590,250 622,285 650,316"/>
+        <path class="e-mgmt" d="M542,230 C596,258 628,293 656,324"/>
+        <text class="e-label" x="600" y="248">5·10·30·99</text>
+        <!-- AG02 <-> Desktop : data + mgmt -->
+        <path class="e-data" d="M748,356 C784,388 800,410 812,436"/>
+        <path class="e-mgmt" d="M722,356 C748,392 776,416 796,438"/>
+        <text class="e-label" x="820" y="404">5u · 99u</text>
+        <!-- AG02 <-> ASUS data -->
+        <path class="e-data" d="M690,356 C660,388 642,410 634,436"/>
+        <text class="e-label" x="626" y="400" text-anchor="end">30u · 1G full</text>
+        <!-- ASUS <-> TV -->
+        <path class="e-data" d="M628,490 L623,540"/>
+        <text class="e-label" x="638" y="518">30u</text>
+
+        <!-- nodes -->
+        <g>
+          <rect class="n-box" x="386" y="26" width="150" height="54"/>
+          <text class="n-name" x="401" y="50">map</text>
+          <text class="n-sub" x="401" y="66">RB5009 · router · .99.1</text>
+        </g>
+        <g>
+          <rect class="n-box" x="386" y="190" width="150" height="54"/>
+          <text class="n-name" x="401" y="214">AG01</text>
+          <text class="n-sub" x="401" y="230">CRS305 · L2 · .99.4</text>
+        </g>
+        <g>
+          <rect class="n-box" x="70" y="300" width="170" height="54"/>
+          <text class="n-name" x="85" y="324">Proxmox</text>
+          <text class="n-sub" x="85" y="340">host · mgmt .99.2</text>
+        </g>
+        <g>
+          <rect class="n-box" x="648" y="300" width="150" height="54"/>
+          <text class="n-name" x="663" y="324">AG02</text>
+          <text class="n-sub" x="663" y="340">CRS305 · L2 · .99.5</text>
+        </g>
+        <g>
+          <rect class="n-box" x="740" y="436" width="150" height="54"/>
+          <text class="n-name" x="755" y="460">Desktop</text>
+          <text class="n-sub" x="755" y="476">2 NICs · .5.9 / .99</text>
+        </g>
+        <g>
+          <rect class="n-box" x="560" y="436" width="140" height="54"/>
+          <text class="n-name" x="575" y="460">ASUS sw</text>
+          <text class="n-sub" x="575" y="476">copper · VLAN 30</text>
+        </g>
+        <g>
+          <rect class="n-box" x="558" y="540" width="126" height="52"/>
+          <text class="n-name" x="573" y="563">TV</text>
+          <text class="n-sub" x="573" y="579">VLAN 30 · IoT</text>
+        </g>
+      </svg>
+      <div class="legend">
+        <span><i class="swatch" style="background:var(--data)"></i>data plane · VLAN 5/10/15/20/30</span>
+        <span><i class="swatch" style="background:var(--mgmt)"></i>management · VLAN 99</span>
+        <span><b class="mono" style="color:var(--muted)">u</b> = untagged / access</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- VLAN PLAN -->
+  <section>
+    <div class="sec-head"><span class="sec-num">02</span><h2>VLAN plan</h2></div>
+    <div class="card">
+      <div class="tbl-scroll">
+        <table class="vlan-tbl">
+          <thead><tr><th>VLAN</th><th>Role</th><th>Subnet</th><th>Gateway</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td><span class="vt data tag">5</span></td><td>Data / desktop LAN</td><td class="mono">192.168.5.0/24</td><td class="mono">192.168.5.1</td><td>Desktop NIC 1, general LAN</td></tr>
+            <tr><td><span class="vt data tag">10</span></td><td>Proxmox VMs</td><td class="mono">10.20.0.0/24</td><td class="mono">10.20.0.1</td><td>VM lives at <span class="mono">10.20.0.7</span></td></tr>
+            <tr><td><span class="vt data tag">15</span></td><td>VM network</td><td class="mono">—</td><td class="mono">—</td><td>Proxmox-only, tagged to host</td></tr>
+            <tr><td><span class="vt data tag">20</span></td><td>VM network</td><td class="mono">—</td><td class="mono">—</td><td>Proxmox-only, tagged to host</td></tr>
+            <tr><td><span class="vt data tag">30</span></td><td>TV / IoT</td><td class="mono">—</td><td class="mono">—</td><td>Untagged → ASUS switch → TV, off AG02</td></tr>
+            <tr><td><span class="vt mgmt tag">99</span></td><td>Management</td><td class="mono">192.168.99.0/28</td><td class="mono">192.168.99.1</td><td>.2 Proxmox · .4 AG01 · .5 AG02</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- PORT MAPS -->
+  <section>
+    <div class="sec-head"><span class="sec-num">03</span><h2>Port maps</h2></div>
+    <p class="sec-note">Read the chips as two facts at once: <b>colour</b> = plane (data / mgmt), <b>style</b> = <span class="vt data tag">tagged</span> outline vs <span class="vt data untag">untagged</span> fill.</p>
+
+    <!-- router -->
+    <div class="card">
+      <div class="card-head">
+        <span class="dev">map</span><span class="meta">RB5009UG+S+ · per-VLAN bridges, tag on NIC</span>
+        <span class="ip">192.168.99.1</span>
+      </div>
+      <div class="tbl-scroll">
+        <table>
+          <thead><tr><th>Port</th><th>Peer</th><th>Plane</th><th>VLANs</th></tr></thead>
+          <tbody>
+            <tr><td class="port">sfp-sfpplus1</td><td class="peer">AG01 · sfp-sfpplus1</td><td><span class="plane-pill data">data</span></td>
+              <td><div class="chips"><span class="vt data tag">5</span><span class="vt data tag">10</span><span class="vt data tag">15</span><span class="vt data tag">20</span><span class="vt data tag">30</span></div></td></tr>
+            <tr><td class="port">ether2</td><td class="peer">AG01 · ether1</td><td><span class="plane-pill mgmt">mgmt</span></td>
+              <td><div class="chips"><span class="vt mgmt tag">99</span></div></td></tr>
+            <tr><td class="port">ether6</td><td class="peer">Proxmox · mgmt NIC</td><td><span class="plane-pill mgmt">mgmt</span></td>
+              <td><div class="chips"><span class="vt mgmt tag">99</span></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="card-head" style="border-top:1px solid var(--line);border-bottom:none;background:transparent;font-size:.85rem">
+        <span class="meta" style="color:var(--muted)">SVIs: <span class="mono">bridge5 .5.1</span> · <span class="mono">bridge10 10.20.0.1</span> · <span class="mono">mgmt99bridge .99.1</span> &nbsp;·&nbsp; forward accept <span class="mono">src-address-list=admin</span> → <span class="mono">out-interface-list=LAN</span></span>
+      </div>
+    </div>
+
+    <!-- AG01 -->
+    <div class="card">
+      <div class="card-head">
+        <span class="dev">AG01</span><span class="meta">CRS305-1G-4S+ · vlan-filtering=yes</span>
+        <span class="ip">192.168.99.4</span>
+      </div>
+      <div class="tbl-scroll">
+        <table>
+          <thead><tr><th>Port</th><th>Peer</th><th>Plane</th><th>VLANs</th></tr></thead>
+          <tbody>
+            <tr><td class="port">ether1</td><td class="peer">map · ether2</td><td><span class="plane-pill mgmt">mgmt</span></td>
+              <td><div class="chips"><span class="vt mgmt tag">99</span></div></td></tr>
+            <tr><td class="port">sfp-sfpplus1</td><td class="peer">map · sfp-sfpplus1</td><td><span class="plane-pill data">data</span></td>
+              <td><div class="chips"><span class="vt data tag">5</span><span class="vt data tag">10</span><span class="vt data tag">15</span><span class="vt data tag">20</span><span class="vt data tag">30</span></div></td></tr>
+            <tr><td class="port">sfp-sfpplus2</td><td class="peer">Proxmox · data NIC</td><td><span class="plane-pill data">data</span></td>
+              <td><div class="chips"><span class="vt data untag">10</span><span class="vt data tag">5</span><span class="vt data tag">15</span><span class="vt data tag">20</span></div></td></tr>
+            <tr><td class="port">sfp-sfpplus3</td><td class="peer">AG02 · sfp-sfpplus1</td><td><span class="plane-pill mix">both</span></td>
+              <td><div class="chips"><span class="vt data tag">5</span><span class="vt data tag">10</span><span class="vt data tag">30</span><span class="vt mgmt tag">99</span></div></td></tr>
+            <tr><td class="port">sfp-sfpplus4</td><td class="peer">— free —</td><td></td><td></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- AG02 -->
+    <div class="card">
+      <div class="card-head">
+        <span class="dev">AG02</span><span class="meta">CRS305-1G-4S+ · vlan-filtering=yes</span>
+        <span class="ip">192.168.99.5</span>
+      </div>
+      <div class="tbl-scroll">
+        <table>
+          <thead><tr><th>Port</th><th>Peer</th><th>Plane</th><th>VLANs</th></tr></thead>
+          <tbody>
+            <tr><td class="port">sfp-sfpplus1</td><td class="peer">AG01 · sfp-sfpplus3</td><td><span class="plane-pill mix">both</span></td>
+              <td><div class="chips"><span class="vt data tag">5</span><span class="vt data tag">10</span><span class="vt data tag">30</span><span class="vt mgmt tag">99</span></div></td></tr>
+            <tr><td class="port">sfp-sfpplus2</td><td class="peer">Desktop · NIC 1 (data)</td><td><span class="plane-pill data">data</span></td>
+              <td><div class="chips"><span class="vt data untag">5</span></div></td></tr>
+            <tr><td class="port">sfp-sfpplus3</td><td class="peer">ASUS switch → TV · 1G full</td><td><span class="plane-pill data">data</span></td>
+              <td><div class="chips"><span class="vt data untag">30</span></div></td></tr>
+            <tr><td class="port">ether1</td><td class="peer">Desktop · NIC 2 (mgmt)</td><td><span class="plane-pill mgmt">mgmt</span></td>
+              <td><div class="chips"><span class="vt mgmt untag">99</span></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Proxmox -->
+    <div class="card">
+      <div class="card-head">
+        <span class="dev">Proxmox</span><span class="meta">VLAN-aware bridge · VM tags on vNIC</span>
+        <span class="ip">192.168.99.2</span>
+      </div>
+      <div class="tbl-scroll">
+        <table>
+          <thead><tr><th>NIC</th><th>Peer</th><th>Plane</th><th>VLANs</th></tr></thead>
+          <tbody>
+            <tr><td class="port">mgmt NIC</td><td class="peer">map · ether6</td><td><span class="plane-pill mgmt">mgmt</span></td>
+              <td><div class="chips"><span class="vt mgmt tag">99</span></div></td></tr>
+            <tr><td class="port">data NIC</td><td class="peer">AG01 · sfp-sfpplus2</td><td><span class="plane-pill data">data</span></td>
+              <td><div class="chips"><span class="vt data untag">10</span><span class="vt data tag">5</span><span class="vt data tag">15</span><span class="vt data tag">20</span></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- INCIDENT LOG -->
+  <section>
+    <div class="sec-head"><span class="sec-num">04</span><h2>What went wrong, in order</h2></div>
+    <p class="sec-note">Eight independent faults, each one masking the next. They're numbered because that's how they surfaced — fixing one exposed the one beneath it.</p>
+    <div class="log">
+
+      <div class="inc"><div class="inc-n">1</div><div class="inc-body">
+        <h3>The subnet was a /29</h3>
+        <p>A <code>/29</code> gives only 6 usable addresses. Any device numbered above <code>.6</code> was, by its own mask, on a different network — so the router (the gateway) could reach a host that the switches and desktop could not.</p>
+        <div class="fix"><b>fix</b><span>Widened the mask to <code>/28</code> so every device counts as a neighbour. Verify it's <code>/28</code> on <em>every</em> host, not just some.</span></div>
+      </div></div>
+
+      <div class="inc"><div class="inc-n">2</div><div class="inc-body">
+        <h3>CRS305 didn't commit the new VLAN to hardware</h3>
+        <p>A freshly-added Bridge VLAN row showed the right <code>tagged</code> ports but an empty <code>current-tagged</code> — the hardware-offloaded switch chip never programmed it, so the VLAN existed on paper and switched nothing.</p>
+        <div class="fix"><b>fix</b><span>Re-apply the entry (Apply in WinBox / re-run the <code>set</code>) to force the chip to reprogram. Trust <code>current-tagged</code>, not <code>tagged</code>.</span></div>
+      </div></div>
+
+      <div class="inc"><div class="inc-n">3</div><div class="inc-body">
+        <h3>Two identical switches, both named “MikroTik”</h3>
+        <p>AG01 and AG02 are the same CRS305 model on default identities — one keystroke from configuring the wrong box and breaking the one that worked.</p>
+        <div class="fix"><b>fix</b><span>Always confirm by IP / bridge name before touching anything: <code>AG01 = .99.4</code>, <code>AG02 = .99.5</code>. (Worth setting real identities.)</span></div>
+      </div></div>
+
+      <div class="inc"><div class="inc-n">4</div><div class="inc-body">
+        <h3>Every bridge port was PVID 1 + admit-all</h3>
+        <p>With <code>pvid=1</code>, untagged traffic landed in VLAN 1 instead of its intended VLAN, and <code>admit-all</code> with ingress-filtering off meant the switch enforced nothing. VLANs looked configured but never classified traffic.</p>
+        <div class="fix"><b>fix</b><span>Access ports: <code>pvid=&lt;vlan&gt;</code>, <code>ingress-filtering=yes</code>. Trunks: <code>pvid=1</code>, <code>frame-types=admit-only-vlan-tagged</code>.</span></div>
+      </div></div>
+
+      <div class="inc"><div class="inc-n">5</div><div class="inc-body">
+        <h3>VLAN 99 on two uplinks = a bridging loop</h3>
+        <p>Adding VLAN 99 to <em>both</em> AG01 <code>ether1</code> and <code>sfp-sfpplus1</code> gave it two parallel paths to the router. The router's per-VLAN vlan-unaware bridges run separate STP instances, so nothing blocked the loop.</p>
+        <div class="fix"><b>fix</b><span>Carry each VLAN on exactly one path to the router. Mgmt rides <code>ether1↔ether2</code> only; the data trunk stays data-only.</span></div>
+      </div></div>
+
+      <div class="inc"><div class="inc-n">6</div><div class="inc-body">
+        <h3>Copper SFP in an SFP+ cage</h3>
+        <p>The RJ45 SFP feeding the TV wouldn't behave: auto-neg <em>on</em> dropped the link (the cage can't negotiate the module's host side), and forcing it created a duplex mismatch — DHCP completed but sustained traffic drowned in late collisions.</p>
+        <div class="fix"><b>done</b><span>Copper handed to a switch that does copper: the ASUS now sits on AG02 <code>sfp-sfpplus3</code> at forced 1G full, and the TV came up instantly. The ASUS runs the auto-neg down to the TV that the SFP+ cage never could.</span></div>
+      </div></div>
+
+      <div class="inc"><div class="inc-n">7</div><div class="inc-body">
+        <h3>“The switch can't ping the VM”</h3>
+        <p>A red herring. An L2 switch can only <em>source</em> a ping from an IP it holds — AG01 had no address on VLAN 10. The data path was fine the whole time (AG02's pings crossed AG01 to reach the VM).</p>
+        <div class="fix"><b>fix</b><span>Add an SVI / DHCP client on the VLAN only to test from the switch — and set <code>add-default-route=no</code> so it doesn't hoard default routes.</span></div>
+      </div></div>
+
+      <div class="inc"><div class="inc-n">8</div><div class="inc-body">
+        <h3>Desktop → VM: a stale firewall address</h3>
+        <p>The real one. The <code>admin</code> address-list held the desktop's old IP <code>.14</code>, but DHCP had drifted it to <code>.9</code>, so the “admin desktop → all VLANs” accept rule never matched. It “used to work” because the desktop used to be <code>.14</code>.</p>
+        <div class="fix"><b>fix</b><span>Pointed the list at <code>192.168.5.9</code> and made the desktop's lease <b>static</b> so its IP can't drift and silently re-break this.</span></div>
+      </div></div>
+
+    </div>
+  </section>
+
+  <!-- HOUSEKEEPING -->
+  <section>
+    <div class="sec-head"><span class="sec-num">05</span><h2>Open housekeeping</h2></div>
+    <p class="sec-note">Nothing here is breaking traffic today — these are the loose ends to tidy when you feel like it.</p>
+    <ul class="todo">
+      <li><span class="box"></span><div><div class="t">AG02 <span class="mono">sfp-sfpplus1</span> PVID 5 → 1</div><div class="d">The trunk to AG01 sits at PVID 5 while AG01's side is PVID 1 — a native-VLAN mismatch. Tagged traffic is fine; set it to <code>pvid=1</code> + <code>admit-only-vlan-tagged</code> to close it.</div></div></li>
+      <li><span class="box"></span><div><div class="t">AG01 diagnostic DHCP clients</div><div class="d">The per-VLAN DHCP clients added to test each get a default route. Set <code>add-default-route=no</code>, or remove them and keep only the mgmt IP on VLAN 99.</div></div></li>
+      <li><span class="box"></span><div><div class="t">Leftover L3 VLAN interfaces</div><div class="d">Stray <span class="mono">vlan5 / vlan10 / vlan30</span> interfaces on the switches — only <span class="mono">mgmt99</span> is needed. Harmless clutter; remove when convenient.</div></div></li>
+      <li><span class="box"></span><div><div class="t">Set real device identities</div><div class="d">Rename the CRS305s off “MikroTik” to <span class="mono">AG01</span> / <span class="mono">AG02</span> so the two-identical-switches trap can't bite again.</div></div></li>
+    </ul>
+  </section>
+
+  <footer>
+    <span>AG Fabric Runbook · captured after the desktop reached <span class="mono">10.20.0.7</span>, TTL 63, 0% loss.</span>
+    <span class="mono">map · AG01 · AG02 · Proxmox</span>
+  </footer>
+
+</div>

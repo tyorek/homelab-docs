@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Homelab — Complaint Desk</title>
+<style>
+  :root { color-scheme: light dark; }
+  body {
+    font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+    background: #f4f5f7;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    padding: 3rem 1rem;
+  }
+  .card {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0,0,0,.08);
+    max-width: 480px;
+    width: 100%;
+    padding: 2rem 2.25rem 2.5rem;
+  }
+  h1 { font-size: 1.4rem; margin: 0 0 .25rem; }
+  p.sub { color: #666; margin: 0 0 1.5rem; font-size: .95rem; }
+  /* Zammad form styling */
+  .zammad-form label { display: block; font-size: .8rem; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; color: #555; margin: 1rem 0 .3rem; }
+  .zammad-form input, .zammad-form textarea {
+    width: 100%; box-sizing: border-box; padding: .6rem .7rem;
+    border: 1px solid #ccc; border-radius: 8px; font-size: 1rem; font-family: inherit;
+  }
+  .zammad-form textarea { min-height: 140px; resize: vertical; }
+  .zammad-form button {
+    margin-top: 1.25rem; width: 100%; padding: .7rem;
+    background: #2c8caf; color: #fff; border: 0; border-radius: 8px;
+    font-size: 1rem; font-weight: 600; cursor: pointer;
+  }
+  .zammad-form button:hover { background: #247394; }
+  @media (prefers-color-scheme: dark) {
+    body { background: #1c1e22; }
+    .card { background: #26282d; color: #e6e6e6; }
+    p.sub { color: #9aa0a6; }
+    .zammad-form label { color: #b0b6bd; }
+    .zammad-form input, .zammad-form textarea { background: #1c1e22; color: #e6e6e6; border-color: #444; }
+  }
+</style>
+</head>
+<body>
+  <div class="card">
+    <h1>🏠 Homelab Complaint Desk</h1>
+    <p class="sub">Something broken, leaking, beeping, or unfair? File it here and it becomes a ticket.</p>
+    <div id="zammad-feedback-form">Loading form…</div>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script id="zammad_form_script" src="https://zammad.home.arpa/assets/form/form.js"></script>
+  <script>
+  $(function() {
+    $('#zammad-feedback-form').ZammadForm({
+      messageTitle: 'Household Complaint',
+      messageSubmit: 'File complaint',
+      messageThankYou: 'Filed! Your complaint is now ticket #%s. Management will respond eventually.',
+      showTitle: false,
+      modal: false
+    });
+  });
+  </script>
+</body>
+</html>

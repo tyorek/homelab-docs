@@ -1,0 +1,12 @@
+[Unit]
+Description=pibox: enforce DMZ (br1) / VLAN 5 (eth1) isolation
+After=network-online.target docker.service pibox-dmz-replies.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/local/sbin/pibox-isolation
+
+[Install]
+WantedBy=multi-user.target
